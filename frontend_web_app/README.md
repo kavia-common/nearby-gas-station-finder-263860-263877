@@ -1,82 +1,93 @@
-# Lightweight React Template for KAVIA
+# Nearby Gas Station Finder (Frontend)
 
-This project provides a minimal React template with a clean, modern UI and minimal dependencies.
+A React web app that uses Google Maps to help users locate nearby gas stations. The app detects the user's current location (with permission), displays stations on the map, and provides distance and directions.
 
 ## Features
 
-- **Lightweight**: No heavy UI frameworks - uses only vanilla CSS and React
-- **Modern UI**: Clean, responsive design with KAVIA brand styling
-- **Fast**: Minimal dependencies for quick loading times
-- **Simple**: Easy to understand and modify
+- Google Maps integration using the official JS API (no extra UI libs)
+- User geolocation with permission handling and HTTPS notes
+- Nearby gas station listing via Google Places Nearby Search
+- Distances via Distance Matrix API (feature-flag toggle) or straight-line fallback
+- Directions deep-link to Google Maps
+- Debounced map movements to reduce quota usage
+- Light, modern UI, accessible focus states, good contrast
+- Env-driven configuration (no secrets in code)
 
-## Getting Started
+## Prerequisites
 
-In the project directory, you can run:
+1. Node.js LTS and npm
+2. A Google Cloud project with the following APIs enabled:
+   - Maps JavaScript API
+   - Places API
+   - Distance Matrix API (optional; only if using the feature flag)
 
-### `npm start`
+3. A Google Maps API key with proper restrictions (HTTP referrers for your domain during production).
 
-Runs the app in development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Setup
 
-### `npm test`
+1. Create a `.env` file in this directory based on `.env.example`:
 
-Launches the test runner in interactive watch mode.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-## Customization
-
-### Colors
-
-The main brand colors are defined as CSS variables in `src/App.css`:
-
-```css
-:root {
-  --kavia-orange: #E87A41;
-  --kavia-dark: #1A1A1A;
-  --text-color: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-}
+```
+cp .env.example .env
 ```
 
-### Components
+2. Edit `.env` and set:
+   - REACT_APP_GOOGLE_MAPS_API_KEY=YOUR_KEY
+   - Optionally set `REACT_APP_FEATURE_FLAGS=enableDistanceMatrix=true` to use the Distance Matrix API.
+   - Optionally set `REACT_APP_LOG_LEVEL=debug` for verbose logs in development.
 
-This template uses pure HTML/CSS components instead of a UI framework. You can find component styles in `src/App.css`. 
+3. Install dependencies:
 
-Common components include:
-- Buttons (`.btn`, `.btn-large`)
-- Container (`.container`)
-- Navigation (`.navbar`)
-- Typography (`.title`, `.subtitle`, `.description`)
+```
+npm install
+```
 
-## Learn More
+4. Run locally:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
+npm start
+```
 
-### Code Splitting
+- App will open at http://localhost:3000.
+- Geolocation requires HTTPS or localhost. If testing over HTTP (non-localhost), your browser will block geolocation.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+5. Build for production:
 
-### Analyzing the Bundle Size
+```
+npm run build
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Security & Permissions
 
-### Making a Progressive Web App
+- Do not hardcode API keys. Use environment variables (REACT_APP_GOOGLE_MAPS_API_KEY).
+- Restrict your API key in Google Cloud (HTTP referrers).
+- The app requests location access. If denied, the app will still function: use map panning/zoom to explore and see stations; distances fall back gracefully.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Configuration
 
-### Advanced Configuration
+Environment variables used:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- REACT_APP_GOOGLE_MAPS_API_KEY (required)
+- REACT_APP_FEATURE_FLAGS (optional; e.g., `enableDistanceMatrix=true`)
+- REACT_APP_LOG_LEVEL (optional; `debug|info|warn|error`)
 
-### Deployment
+Other container vars supported but optional:
+REACT_APP_API_BASE, REACT_APP_BACKEND_URL, REACT_APP_FRONTEND_URL, REACT_APP_WS_URL, REACT_APP_NODE_ENV, REACT_APP_NEXT_TELEMETRY_DISABLED, REACT_APP_ENABLE_SOURCE_MAPS, REACT_APP_PORT, REACT_APP_TRUST_PROXY, REACT_APP_HEALTHCHECK_PATH, REACT_APP_EXPERIMENTS_ENABLED
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+## Notes on Quotas
 
-### `npm run build` fails to minify
+- Nearby Search and Distance Matrix have quotas. This app debounces map idle events and limits markers to reduce usage.
+- Use the feature flag to disable Distance Matrix if you want to rely on straight-line distances only.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Accessibility
+
+- Visible focus styles
+- Sufficient color contrast
+- ARIA labels for landmark sections and buttons
+
+## Troubleshooting
+
+- "Google Maps API key missing": Ensure `.env` has REACT_APP_GOOGLE_MAPS_API_KEY and restart dev server.
+- Geolocation blocked: Use HTTPS or localhost, and enable permissions in your browser.
+- No stations found: Zoom out or move the map to a populated area.
+
